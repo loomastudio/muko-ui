@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+<title>MUKO Hatchery</title>
+
+<meta name="description" content="MUKO: hatch whimsical collectible creatures, browse the card gallery, and bring your favourite to life as a physical art toy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Young+Serif&display=swap">
+<style>
+/* Layout: airy horizontal bands. Hero = copy + interactive egg; element strip; masonry card gallery; two-pane Manifest with a journey timeline. */
+:root{
+  --bg:#F8F6F1;          /* bone */
+  --surface:#FFFFFD;     /* card paper */
+  --wash:#F1EEE7;        /* quiet band */
+  --ink:#2F3140;         /* slate charcoal */
+  --ink-2:#696B7B;
+  --line:#E6E2DA;
+  --flora:#62A574;
+  --porcelain:#5F8DD0;
+  --obsidian:#7A60A6;
+  --iron:#C9764B;
+  --stardust:#D29E22;
+  --cheek:#EF93A9;
+  --shadow-c:47 49 64;
+  --font-display:"Young Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --font-ui:"Figtree",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --ease:cubic-bezier(.22,.8,.3,1);
+  --r-card:20px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1B1D28; --surface:#252837; --wash:#212331; --ink:#EEEBE4; --ink-2:#A6A7B6; --line:#353849;
+    --flora:#82C592; --porcelain:#8BB0E8; --obsidian:#A88FD6; --iron:#E59A6E; --stardust:#EEC456; --cheek:#F3A3B6;
+    --shadow-c:0 0 0; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1B1D28; --surface:#252837; --wash:#212331; --ink:#EEEBE4; --ink-2:#A6A7B6; --line:#353849;
+  --flora:#82C592; --porcelain:#8BB0E8; --obsidian:#A88FD6; --iron:#E59A6E; --stardust:#EEC456; --cheek:#F3A3B6;
+  --shadow-c:0 0 0; color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;margin:0;text-wrap:balance;letter-spacing:-.005em}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--porcelain) 70%,transparent);outline-offset:3px;border-radius:10px}
+
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.band{padding-block:88px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.section-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:20px 40px;margin-bottom:36px}
+.section-head h2{font-size:clamp(2rem,3.6vw,2.8rem);line-height:1.08;margin-top:10px}
+.section-head p.lede{max-width:46ch;color:var(--ink-2);margin-top:12px}
+
+/* Buttons: bouncy, with a soft light bloom on hover */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 24px;border-radius:999px;border:1.5px solid transparent;font-weight:700;font-size:15px;text-decoration:none;
+  transition:transform .45s var(--spring),box-shadow .35s var(--ease),background-color .3s;will-change:transform}
+.btn:hover{transform:translateY(-2px) scale(1.035);box-shadow:0 0 0 7px color-mix(in srgb,var(--stardust) 16%,transparent),0 12px 34px -10px color-mix(in srgb,var(--stardust) 70%,transparent)}
+.btn:active{transform:scale(.96);transition-duration:.12s}
+.btn-primary{background:var(--ink);color:var(--bg)}
+.btn-ghost{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.btn-ghost:hover{box-shadow:0 0 0 7px color-mix(in srgb,var(--porcelain) 14%,transparent),0 12px 34px -12px color-mix(in srgb,var(--porcelain) 60%,transparent)}
+.btn svg{width:16px;height:16px}
+
+/* Nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:68px}
+.logo{display:inline-flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:24px;letter-spacing:.04em;color:var(--ink);text-decoration:none}
+.logo svg{width:26px;height:30px}
+.nav-links{display:flex;gap:6px;list-style:none;margin:0;padding:0}
+.nav-links a{display:block;padding:8px 14px;border-radius:999px;color:var(--ink-2);text-decoration:none;font-weight:600;font-size:15px;transition:background-color .25s,color .25s,transform .4s var(--spring)}
+.nav-links a:hover{background:var(--wash);color:var(--ink);transform:translateY(-1px)}
+.nav .btn{padding:10px 18px;font-size:14px}
+@media (max-width:760px){.nav-links{display:none}}
+
+/* Hero */
+.hero{padding-block:56px 80px}
+.hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:40px 56px;align-items:center}
+.hero-copy{min-width:0;display:grid;gap:24px;justify-items:start}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:7px 14px 7px 8px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink-2)}
+.pill b{display:inline-grid;place-items:center;height:22px;padding:0 9px;border-radius:999px;background:color-mix(in srgb,var(--flora) 20%,var(--surface));color:var(--ink);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.hero h1{font-size:clamp(2.6rem,5.6vw,4.5rem);line-height:1.03}
+.squiggle{position:relative;white-space:nowrap}
+.squiggle svg{position:absolute;left:-2%;bottom:-.16em;width:104%;height:.32em;overflow:visible}
+.hero-sub{font-size:1.15rem;color:var(--ink-2);max-width:44ch}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:12px}
+.hero-stats{display:flex;flex-wrap:wrap;gap:12px 36px;margin:8px 0 0;padding-top:24px;border-top:1px solid var(--line)}
+.hero-stats div{display:grid;gap:2px}
+.hero-stats dt{font-size:13px;color:var(--ink-2);order:2}
+.hero-stats dd{margin:0;font-family:var(--font-display);font-size:1.7rem;line-height:1.1;order:1;font-variant-numeric:tabular-nums}
+
+.stage{position:relative;isolation:isolate;display:grid;place-items:center;width:100%;max-width:470px;aspect-ratio:1/1;margin-inline:auto;border-radius:50%}
+.stage::before{content:"";position:absolute;inset:4%;z-index:-1;border-radius:50%;
+  background:radial-gradient(circle at 50% 46%,color-mix(in srgb,var(--stardust) 42%,transparent) 0%,color-mix(in srgb,var(--porcelain) 22%,transparent) 38%,color-mix(in srgb,var(--flora) 12%,transparent) 56%,transparent 70%);
+  filter:blur(6px);transition:transform .8s var(--spring),opacity .6s;opacity:.85}
+.stage:hover::before{transform:scale(1.12);opacity:1}
+.stage>*{grid-area:1/1}
+.orbit{position:absolute;inset:9%;z-index:-1;border-radius:50%;border:1.5px dashed color-mix(in srgb,var(--ink) 14%,transparent);animation:spin 60s linear infinite}
+.orbit i{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--c)}
+.pedestal{align-self:end;width:46%;height:20px;margin-bottom:13%;border-radius:50%;background:color-mix(in srgb,var(--ink) 11%,transparent);filter:blur(3px);transition:opacity .4s}
+.egg{background:none;border:0;padding:0;width:56%;margin-bottom:6%;border-radius:45%;animation:float 4.5s ease-in-out infinite;-webkit-tap-highlight-color:transparent}
+.egg-svg{display:block;width:100%;height:auto;overflow:visible;transform-origin:50% 88%;transition:transform .5s var(--spring),filter .5s}
+.egg:hover .egg-svg{transform:scale(1.04);filter:drop-shadow(0 0 22px color-mix(in srgb,var(--stardust) 55%,transparent))}
+.egg.shake .egg-svg{animation:wobble .55s var(--ease)}
+.egg.pop .egg-svg{animation:pop .5s var(--ease) forwards}
+.crack{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .45s var(--ease)}
+.egg[data-stage="1"] .c1,.egg[data-stage="2"] .c1,.egg[data-stage="2"] .c2,.egg[data-stage="3"] .crack{stroke-dashoffset:0}
+.peek{opacity:0;transition:opacity .4s .2s}
+.egg[data-stage="2"] .peek,.egg[data-stage="3"] .peek{opacity:1}
+.hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;white-space:nowrap;font-size:14px;font-weight:600;color:var(--ink-2)}
+.dots{display:flex;gap:5px}
+.dots i{width:8px;height:8px;border-radius:50%;background:color-mix(in srgb,var(--ink) 16%,transparent);transition:background-color .3s,transform .4s var(--spring)}
+.dots i.on{background:var(--stardust);transform:scale(1.3)}
+.result{display:grid;justify-items:center;gap:16px;width:100%;padding-block:8px 4px}
+.result .card{width:min(270px,100%);animation:rise .8s var(--spring) both}
+.result-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;animation:rise .8s .12s var(--spring) both}
+.result-actions .btn{padding:11px 18px;font-size:14px}
+.result-note{font-size:14px;color:var(--ink-2);text-align:center}
+.spark{position:absolute;left:50%;top:44%;width:12px;height:12px;margin:-6px;border-radius:50%;background:var(--c);pointer-events:none;animation:fly .9s cubic-bezier(.15,.7,.3,1) forwards}
+.spark.star{border-radius:0;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);width:18px;height:18px;margin:-9px}
+
+@media (max-width:860px){
+  .hero .wrap{grid-template-columns:1fr}
+  .hero-visual{order:-1}
+  .stage{max-width:380px}
+}
+
+/* Element strip */
+.elements{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.el-tile{display:grid;gap:10px;align-content:start;padding:20px;border-radius:18px;background:var(--surface);border:1px solid var(--line);text-align:left;
+  transition:transform .5s var(--spring),box-shadow .35s,border-color .3s}
+.el-tile:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--el) 45%,var(--line));box-shadow:0 14px 36px -16px color-mix(in srgb,var(--el) 70%,transparent)}
+.el-tile h3{font-size:1.3rem}
+.el-tile p{font-size:14px;color:var(--ink-2)}
+.el-tile .matchup{font-size:12.5px;font-weight:600;color:var(--ink-2);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.glyph{display:inline-grid;place-items:center;flex:none;width:var(--gs,40px);height:var(--gs,40px);border-radius:50%;background:var(--el);color:var(--surface)}
+.glyph svg{width:56%;height:56%}
+.mini{--gs:18px}
+@media (max-width:980px){.elements{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}}
+
+.el-flora{--el:var(--flora)} .el-porcelain{--el:var(--porcelain)} .el-obsidian{--el:var(--obsidian)} .el-iron{--el:var(--iron)} .el-stardust{--el:var(--stardust)}
+
+/* Gallery */
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px 8px 9px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;
+  transition:transform .4s var(--spring),background-color .25s,border-color .25s,color .25s}
+.chip:hover{transform:translateY(-2px)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip.all{padding-left:14px}
+.chip .glyph{--gs:20px}
+.gallery-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--ink-2);font-size:14px;margin-bottom:20px}
+.masonry{columns:4 250px;column-gap:22px}
+.masonry>*{break-inside:avoid;margin-bottom:22px}
+.lore{display:grid;gap:14px;padding:24px;border-radius:var(--r-card);background:color-mix(in srgb,var(--el) 13%,var(--surface));border:1px solid color-mix(in srgb,var(--el) 22%,var(--line))}
+.lore q{font-family:var(--font-display);font-size:1.25rem;line-height:1.3;quotes:"\201C" "\201D"}
+.lore span{font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+
+/* The collectible card */
+.card{position:relative;display:block;padding:9px;border-radius:var(--r-card);background:color-mix(in srgb,var(--el) 24%,var(--surface));
+  box-shadow:0 1px 2px rgb(var(--shadow-c)/.07),0 10px 26px -14px rgb(var(--shadow-c)/.28);
+  transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--lift,0px));
+  transition:transform .6s var(--spring),box-shadow .4s var(--ease)}
+.card:hover{--lift:-6px;box-shadow:0 0 0 1px color-mix(in srgb,var(--el) 30%,transparent),0 22px 50px -18px color-mix(in srgb,var(--el) 75%,transparent)}
+.card.tilting{transition:transform .12s linear,box-shadow .4s var(--ease)}
+.card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .4s;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,30%),rgb(255 255 255/.42),transparent 46%)}
+.card:hover::after{opacity:1}
+.card-inner{display:grid;gap:9px;padding:12px;border-radius:14px;background:var(--surface);min-width:0}
+.card-inner>*{min-width:0}
+.card-head{display:flex;align-items:center;gap:8px}
+.card-name{font-size:1.2rem;line-height:1.2;flex:1;min-width:0;overflow-wrap:anywhere}
+.card-hp{font-weight:800;font-size:1.15rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.card-hp small{font-size:10px;font-weight:700;letter-spacing:.06em;margin-right:2px;color:var(--ink-2)}
+.card-head .glyph{--gs:24px}
+.art{position:relative;aspect-ratio:5/4;max-width:100%;border-radius:10px;overflow:hidden}
+.art svg{display:block;width:100%;height:100%}
+.art-no{position:absolute;right:8px;top:7px;font-size:10.5px;font-weight:700;letter-spacing:.06em;color:#2E2A3A;opacity:.55;font-variant-numeric:tabular-nums}
+.art[data-el="flora"]{background:radial-gradient(rgb(255 255 255/.5) 1.2px,transparent 1.6px) 0 0/14px 14px,linear-gradient(160deg,#E7F4E3,#C3E3C8)}
+.art[data-el="porcelain"]{background:radial-gradient(rgb(255 255 255/.6) 1.2px,transparent 1.6px) 0 0/14px 14px,linear-gradient(160deg,#EAF0FA,#C9D8F1)}
+.art[data-el="obsidian"]{background:radial-gradient(rgb(255 255 255/.45) 1.2px,transparent 1.6px) 0 0/14px 14px,linear-gradient(160deg,#ECE5F5,#CABCE4)}
+.art[data-el="iron"]{background:radial-gradient(rgb(255 255 255/.5) 1.2px,transparent 1.6px) 0 0/14px 14px,linear-gradient(160deg,#FBEADF,#EEC7AD)}
+.art[data-el="stardust"]{background:radial-gradient(rgb(255 255 255/.6) 1.2px,transparent 1.6px) 0 0/14px 14px,linear-gradient(160deg,#FDF3D8,#F3D993)}
+.is-mythic .art::after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:soft-light;opacity:.7;
+  background:conic-gradient(from var(--holo,0deg) at 50% 60%,#ffd6e8,#d6f1ff,#e5ffd6,#fff2c2,#e9d6ff,#ffd6e8);transition:--holo 1s}
+.is-mythic:hover .art::after{animation:holo 3s linear infinite}
+@property --holo{syntax:"<angle>";inherits:false;initial-value:0deg}
+.typeline{font-size:12px;font-weight:600;color:var(--ink-2);letter-spacing:.02em}
+.moves{display:grid}
+.move{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding-block:8px;border-top:1px solid var(--line)}
+.cost{display:flex;gap:3px}
+.cost i{width:11px;height:11px;border-radius:50%;background:var(--el)}
+.move-text{display:grid;min-width:0}
+.move-text b{font-size:14px;line-height:1.3}
+.move-text small{font-size:12px;color:var(--ink-2);line-height:1.35}
+.dmg{font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums}
+.card-foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 8px;padding-top:9px;border-top:1px solid var(--line);font-size:11px;font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.card-foot>span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.card-foot .glyph{--gs:15px}
+.rarity{color:var(--ink)}
+
+/* Manifest */
+.manifest{background:var(--wash);border-block:1px solid var(--line)}
+.manifest-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px 64px;align-items:center}
+.showcase{position:relative;isolation:isolate;display:grid;place-items:center;aspect-ratio:1/1;max-width:500px;width:100%;margin-inline:auto;border-radius:32px;overflow:hidden;
+  background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--el) 30%,var(--surface)),color-mix(in srgb,var(--el) 12%,var(--surface)) 70%);border:1px solid var(--line);transition:background .6s}
+.showcase>*{grid-area:1/1;transition:opacity .5s var(--ease),transform .7s var(--spring)}
+.showcase .card{width:min(260px,74%)}
+.showcase[data-mode="digital"] .toy,.showcase[data-mode="physical"] .card{opacity:0;transform:scale(.82) translateY(16px);pointer-events:none}
+.mode-badge{position:absolute;top:18px;left:18px;display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:12.5px;font-weight:700;z-index:2}
+.mode-badge i{width:8px;height:8px;border-radius:50%;background:var(--el)}
+.toy{display:grid;justify-items:center;width:78%}
+.toy-figure{width:100%;filter:saturate(.92) drop-shadow(0 18px 16px rgb(var(--shadow-c)/.18))}
+.toy-figure svg{display:block;width:100%;height:auto}
+.toy-base{width:62%;height:26px;margin-top:-18px;border-radius:50%;background:linear-gradient(var(--surface),color-mix(in srgb,var(--el) 18%,var(--surface)));box-shadow:0 10px 18px -8px rgb(var(--shadow-c)/.35),inset 0 -3px 0 color-mix(in srgb,var(--el) 25%,transparent)}
+.toy-tag{margin-top:18px;padding:6px 12px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:12px;font-weight:700;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+
+.manifest-copy{display:grid;gap:22px;justify-items:start;min-width:0}
+.manifest-copy h2{font-size:clamp(2rem,3.6vw,2.8rem);line-height:1.08}
+.picker{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.picker-label{font-size:13px;font-weight:700;color:var(--ink-2);width:100%}
+.avatar{width:58px;height:58px;padding:0;border-radius:50%;overflow:hidden;border:2px solid var(--surface);box-shadow:0 0 0 1.5px var(--line);background:none;transition:transform .45s var(--spring),box-shadow .3s}
+.avatar .art{width:100%;height:100%;aspect-ratio:auto;border-radius:0}
+.avatar .art svg{transform:scale(1.35) translateY(4%)}
+.avatar:hover{transform:translateY(-3px) scale(1.06)}
+.avatar[aria-pressed="true"]{box-shadow:0 0 0 2.5px var(--ink),0 8px 20px -8px color-mix(in srgb,var(--el) 80%,transparent)}
+.seg{position:relative;display:inline-grid;grid-template-columns:1fr 1fr;padding:5px;border-radius:999px;background:var(--surface);border:1px solid var(--line);max-width:100%}
+.seg button{position:relative;z-index:1;border:0;background:none;padding:11px 20px;border-radius:999px;font-weight:700;font-size:15px;white-space:nowrap;color:var(--ink-2);transition:color .3s}
+.seg button[aria-pressed="true"]{color:var(--bg)}
+.seg .thumb{position:absolute;top:5px;bottom:5px;left:5px;width:calc(50% - 5px);border-radius:999px;background:var(--ink);transition:transform .55s var(--spring)}
+.seg[data-mode="physical"] .thumb{transform:translateX(100%)}
+.mode-copy{font-size:1.05rem;color:var(--ink-2);max-width:46ch}
+.specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 28px;margin:0;width:100%;max-width:480px;padding:18px 0;border-block:1px solid var(--line)}
+.specs dt{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.specs dd{margin:2px 0 0;font-weight:600;font-variant-numeric:tabular-nums}
+@media (max-width:860px){.manifest-grid{grid-template-columns:1fr}}
+@media (max-width:420px){.seg button{padding:10px 14px;font-size:14px}}
+
+.journey{margin-top:72px}
+.journey-head{display:flex;justify-content:space-between;align-items:end;flex-wrap:wrap;gap:12px;margin-bottom:26px}
+.journey-head h3{font-size:1.6rem}
+.journey-head p{color:var(--ink-2);font-size:14px}
+.timeline{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0}
+.step{position:relative;display:grid;gap:6px;align-content:start;padding-right:16px}
+.step::before{content:"";position:absolute;top:15px;left:32px;right:0;height:3px;border-radius:3px;background:var(--line)}
+.step:last-child::before{display:none}
+.step.done::before{background:var(--el,var(--flora))}
+.node{position:relative;z-index:1;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;border:2.5px solid var(--line);background:var(--surface);color:var(--surface);transition:transform .5s var(--spring),background-color .3s,border-color .3s}
+.node svg{width:15px;height:15px}
+.step.done .node{background:var(--el);border-color:var(--el)}
+.step.current .node{border-color:var(--el);box-shadow:0 0 0 6px color-mix(in srgb,var(--el) 22%,transparent);animation:breathe 2.2s ease-in-out infinite}
+.step.current .node::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--el)}
+.step.next .node{border-style:dashed;border-color:var(--el)}
+.step h4{margin:10px 0 0;font-size:15px;font-weight:700}
+.step p{font-size:13px;color:var(--ink-2);line-height:1.45}
+.step time,.step .when{font-size:12px;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.step.upcoming h4,.step.upcoming p{opacity:.6}
+.bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:4px;max-width:140px}
+.bar i{display:block;height:100%;width:var(--p);background:var(--el);border-radius:inherit}
+@media (max-width:860px){
+  .timeline{grid-template-columns:1fr;gap:4px}
+  .step{grid-template-columns:32px 1fr;column-gap:16px;padding:0 0 18px}
+  .step>*:not(.node){grid-column:2}
+  .step .node{grid-row:1/span 4}
+  .step h4{margin-top:4px}
+  .step::before{top:34px;bottom:0;left:14.5px;right:auto;width:3px;height:auto}
+}
+
+/* Footer */
+.footer{padding-block:48px 56px}
+.footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:20px}
+.footer p{color:var(--ink-2);font-size:14px}
+.footer ul{display:flex;gap:20px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.footer a{color:var(--ink-2);text-decoration:none;font-weight:600;font-size:14px}
+.footer a:hover{color:var(--ink)}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:60;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  max-width:calc(100% - 32px);padding:13px 18px;border-radius:14px;background:var(--ink);color:var(--bg);font-weight:600;font-size:14px;box-shadow:0 18px 40px -16px rgb(var(--shadow-c)/.5);
+  transition:opacity .3s,transform .5s var(--spring)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes wobble{0%{transform:rotate(0)}20%{transform:rotate(-9deg) scale(1.03)}45%{transform:rotate(7deg)}70%{transform:rotate(-4deg)}100%{transform:rotate(0)}}
+@keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.14,.9)}100%{transform:scale(1.5);opacity:0}}
+@keyframes rise{from{opacity:0;transform:translateY(34px) scale(.7)}to{opacity:1;transform:none}}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(200deg) scale(.3);opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes breathe{50%{box-shadow:0 0 0 10px color-mix(in srgb,var(--el) 12%,transparent)}}
+@keyframes holo{to{--holo:360deg}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Main">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="MUKO home">
+      <svg viewBox="0 0 26 30" aria-hidden="true"><path d="M13 1.5C19.5 1.5 24.5 12 24.5 18.5 24.5 25 19.5 28.5 13 28.5S1.5 25 1.5 18.5C1.5 12 6.5 1.5 13 1.5Z" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/><circle cx="9" cy="14" r="2" fill="var(--flora)"/><circle cx="16.5" cy="11" r="1.6" fill="var(--porcelain)"/><circle cx="17" cy="20" r="2.2" fill="var(--stardust)"/><circle cx="10" cy="22" r="1.5" fill="var(--iron)"/></svg>
+      MUKO
+    </a>
+    <ul class="nav-links">
+      <li><a href="#hatch">Hatch</a></li>
+      <li><a href="#elements">Elements</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#manifest">Manifest</a></li>
+    </ul>
+    <a class="btn btn-primary" href="#hatch">Get an egg</a>
+  </div>
+</nav>
+
+<main id="top">
+  <!-- Hero -->
+  <section class="hero" id="hatch" aria-labelledby="hero-title">
+    <div class="wrap">
+      <div class="hero-copy">
+        <span class="pill"><b>Series 01</b> The Looking-Glass Drop</span>
+        <h1 id="hero-title">Somewhere down the rabbit hole, a creature is
+          <span class="squiggle">waiting.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 12C30 3 52 18 80 10S130 3 158 11 190 13 198 8" fill="none" stroke="var(--stardust)" stroke-width="5" stroke-linecap="round"/></svg></span>
+        </h1>
+        <p class="hero-sub">MUKO are collectible creatures that hatch from mystery eggs. Raise yours as a digital card, then bring your favourite to life as a hand-finished art toy.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#gallery">Browse the creatures
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4 12.5 8l-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a class="btn btn-ghost" href="#manifest">How Manifest works</a>
+        </div>
+        <dl class="hero-stats">
+          <div><dt>creatures in Series 01</dt><dd>120</dd></div>
+          <div><dt>elemental types</dt><dd>5</dd></div>
+          <div><dt>eggs hatch a Mythic</dt><dd>1 in 40</dd></div>
+        </dl>
+      </div>
+
+      <div class="hero-visual">
+        <div class="stage" id="stage">
+          <div class="orbit" aria-hidden="true">
+            <i style="--c:var(--flora);top:6%;left:24%"></i>
+            <i style="--c:var(--porcelain);top:30%;right:-1%"></i>
+            <i style="--c:var(--obsidian);bottom:8%;right:22%"></i>
+            <i style="--c:var(--iron);bottom:24%;left:-1%"></i>
+            <i style="--c:var(--stardust);top:-1%;right:40%"></i>
+          </div>
+          <div class="pedestal" id="pedestal" aria-hidden="true"></div>
+          <button class="egg" id="egg" data-stage="0" aria-label="Mystery egg. Tap three times to hatch it.">
+            <svg class="egg-svg" viewBox="0 0 200 240" aria-hidden="true">
+              <defs>
+                <radialGradient id="eggShade" cx="36%" cy="28%" r="80%">
+                  <stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#F4F0F8"/><stop offset="1" stop-color="#D9D0E8"/>
+                </radialGradient>
+                <clipPath id="eggClip"><path d="M100 18C146 18 176 96 176 146 176 192 142 222 100 222S24 192 24 146C24 96 54 18 100 18Z"/></clipPath>
+              </defs>
+              <path d="M100 18C146 18 176 96 176 146 176 192 142 222 100 222S24 192 24 146C24 96 54 18 100 18Z" fill="url(#eggShade)"/>
+              <g clip-path="url(#eggClip)">
+                <path d="M10 150q15-14 30 0t30 0 30 0 30 0 30 0 30 0" fill="none" stroke="#9DB9E6" stroke-width="10" stroke-linecap="round" opacity=".55"/>
+                <circle cx="66" cy="70" r="9" fill="#8FCB9C"/><circle cx="128" cy="58" r="6" fill="#F0C75E"/>
+                <circle cx="146" cy="104" r="10" fill="#E9A47C"/><circle cx="56" cy="118" r="6" fill="#B29BD8"/>
+                <circle cx="96" cy="100" r="5" fill="#9DB9E6"/><circle cx="140" cy="184" r="8" fill="#B29BD8"/>
+                <circle cx="70" cy="190" r="10" fill="#F0C75E"/><circle cx="108" cy="200" r="5" fill="#8FCB9C"/>
+                <ellipse cx="74" cy="56" rx="16" ry="26" fill="#fff" opacity=".5" transform="rotate(24 74 56)"/>
+                <g class="peek"><path d="M84 92l16 0 4 12-12 6z" fill="#3A3150" opacity=".85"/><circle cx="94" cy="100" r="2.2" fill="#FFF6D8"/></g>
+              </g>
+              <g fill="none" stroke="#5B5470" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <path class="crack c1" pathLength="1" d="M102 62l-9 14 11 8-7 14"/>
+                <path class="crack c2" pathLength="1" d="M104 86l15 5-4 13 13 7"/>
+                <path class="crack c3" pathLength="1" d="M34 132l16-5 8 11 15-9 11 11 15-9 12 10 15-8 13 9 17-6"/>
+              </g>
+            </svg>
+          </button>
+          <div class="result" id="result" hidden></div>
+          <p class="hint" id="hint"><span id="hintText">Tap the egg to hatch it</span><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Elements -->
+  <section class="band" id="elements" aria-labelledby="el-title" style="padding-top:24px">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Elemental types</span>
+          <h2 id="el-title">Every MUKO is born from one of five elements</h2>
+        </div>
+        <p class="lede">Each element is strong against one and soft against another, so a good collection mixes them all.</p>
+      </div>
+      <div class="elements" id="elementTiles"></div>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section class="band" id="gallery" aria-labelledby="gal-title" style="padding-top:24px">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Creature gallery</span>
+          <h2 id="gal-title">Meet the Series 01 hatchlings</h2>
+        </div>
+        <div class="filters" id="filters" role="group" aria-label="Filter by element"></div>
+      </div>
+      <div class="gallery-meta"><span id="count"></span><span>Hover a card to tilt it. Mythic cards shimmer.</span></div>
+      <div class="masonry" id="masonry"></div>
+    </div>
+  </section>
+
+  <!-- Manifest -->
+  <section class="band manifest" id="manifest" aria-labelledby="man-title">
+    <div class="wrap">
+      <div class="manifest-grid">
+        <div class="showcase" id="showcase" data-mode="digital" aria-live="polite"></div>
+        <div class="manifest-copy">
+          <span class="eyebrow">Manifest · digital to physical</span>
+          <h2 id="man-title">Keep it digital, or bring it to life.</h2>
+          <div class="picker" id="picker"><span class="picker-label">Choose a MUKO</span></div>
+          <div class="seg" id="seg" data-mode="digital" role="group" aria-label="Choose a form">
+            <span class="thumb" aria-hidden="true"></span>
+            <button type="button" id="seg-digital" data-mode="digital" aria-pressed="true">Keep it digital</button>
+            <button type="button" id="seg-physical" data-mode="physical" aria-pressed="false">Bring it to life</button>
+          </div>
+          <p class="mode-copy" id="modeCopy"></p>
+          <dl class="specs" id="specs"></dl>
+          <button class="btn btn-primary" id="manifestCta" type="button"></button>
+        </div>
+      </div>
+
+      <div class="journey">
+        <div class="journey-head">
+          <h3 id="journeyTitle">Mossbun's journey</h3>
+          <p id="journeyNote"></p>
+        </div>
+        <ol class="timeline" id="timeline"></ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Back to top">
+      <svg viewBox="0 0 26 30" aria-hidden="true"><path d="M13 1.5C19.5 1.5 24.5 12 24.5 18.5 24.5 25 19.5 28.5 13 28.5S1.5 25 1.5 18.5C1.5 12 6.5 1.5 13 1.5Z" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/><circle cx="9" cy="14" r="2" fill="var(--flora)"/><circle cx="16.5" cy="11" r="1.6" fill="var(--porcelain)"/><circle cx="17" cy="20" r="2.2" fill="var(--stardust)"/><circle cx="10" cy="22" r="1.5" fill="var(--iron)"/></svg>
+      MUKO
+    </a>
+    <p>Series 01 · The Looking-Glass Drop. Design concept with sample creatures.</p>
+    <ul>
+      <li><a href="#hatch">Hatch</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#manifest">Manifest</a></li>
+    </ul>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+const ELEMENTS = {
+  flora:     {name:'Flora',     trait:'Leafy, soft and stubborn. Grows bolder in sunlight.',     weak:'iron',      resist:'porcelain'},
+  porcelain: {name:'Porcelain', trait:'Glazed and delicate. Very polite at tea parties.',        weak:'obsidian',  resist:'stardust'},
+  obsidian:  {name:'Obsidian',  trait:'Glossy volcanic glass. Quiet, sharp and loyal.',          weak:'flora',     resist:'iron'},
+  iron:      {name:'Iron',      trait:'Rivets, gears and a little rust. Built to tinker.',       weak:'stardust',  resist:'flora'},
+  stardust:  {name:'Stardust',  trait:'Fell off a wishing star. Sparkles when it is happy.',     weak:'porcelain', resist:'obsidian'},
+};
+const ORDER = ['flora','porcelain','obsidian','iron','stardust'];
+const RARITY = {Common:'●', Uncommon:'◆', Rare:'★', Mythic:'✦'};
+const WEIGHTS = {Common:55, Uncommon:28, Rare:14.5, Mythic:2.5};
+
+// v = [body shape, eye style, mouth style]
+const CREATURES = [
+  {id:'mossbun',    name:'Mossbun',    el:'flora',     hp:60,  stage:'Hatchling', h:'3.1 in', rarity:'Common',   no:14, v:[0,0,0],
+    moves:[['Nap in Clover',1,'10','Heal 10 HP after this attack.'],['Petal Puff',2,'30','']]},
+  {id:'teacupid',   name:'Teacupid',   el:'porcelain', hp:70,  stage:'Hatchling', h:'3.4 in', rarity:'Uncommon', no:31, v:[0,2,1],
+    moves:[['Mad Tea Spill',1,'20','Flip a coin. Heads: the target is Sleepy.'],['Unbirthday Wish',2,'40','']]},
+  {id:'boltbuck',   name:'Boltbuck',   el:'iron',      hp:100, stage:'Sprout',    h:'4.6 in', rarity:'Rare',     no:72, v:[2,2,2],
+    moves:[['Wind-Up',1,'','Attach an extra Iron energy.'],['Clockwork Charge',3,'80','']]},
+  {id:'inkmoth',    name:'Inkmoth',    el:'obsidian',  hp:80,  stage:'Sprout',    h:'4.0 in', rarity:'Rare',     no:53, v:[2,0,0],
+    moves:[['Grin & Vanish',1,'','Dodge the next attack.'],['Midnight Flutter',2,'50','']]},
+  {id:'twinklope',  name:'Twinklope',  el:'stardust',  hp:120, stage:'Bloom',     h:'5.2 in', rarity:'Mythic',   no:101, v:[1,2,0],
+    moves:[['Wishing Glow',2,'30','Heal 30 HP from each of your MUKO.'],['Falling Star',3,'110','']]},
+  {id:'thistlewick',name:'Thistlewick',el:'flora',     hp:90,  stage:'Sprout',    h:'4.2 in', rarity:'Rare',     no:18, v:[1,1,2],
+    moves:[['Prickle Hug',2,'40',''],['Paint the Roses',3,'70','Discard one Flora energy.']]},
+  {id:'rivetroo',   name:'Rivetroo',   el:'iron',      hp:60,  stage:'Hatchling', h:'3.3 in', rarity:'Common',   no:68, v:[1,0,1],
+    moves:[['Tinker',1,'10',''],['Spring Hop',2,'30','']]},
+  {id:'glazelle',   name:'Glazelle',   el:'porcelain', hp:110, stage:'Bloom',     h:'5.0 in', rarity:'Mythic',   no:40, v:[1,0,2],
+    moves:[['Curiouser',2,'40','Look at the top 3 cards of your deck.'],['Kiln Song',3,'100','']]},
+  {id:'nebbles',    name:'Nebbles',    el:'stardust',  hp:40,  stage:'Hatchling', h:'2.8 in', rarity:'Common',   no:95, v:[0,1,1],
+    moves:[['Tiny Twinkle',1,'10',''],['Moon Bounce',2,'20','']]},
+  {id:'gloomlet',   name:'Gloomlet',   el:'obsidian',  hp:50,  stage:'Hatchling', h:'2.9 in', rarity:'Common',   no:49, v:[0,1,0],
+    moves:[['Shadow Peek',1,'10',''],['Glassy Stare',2,'30','The target cannot retreat next turn.']]},
+  {id:'clovercap',  name:'Clovercap',  el:'flora',     hp:50,  stage:'Hatchling', h:'2.7 in', rarity:'Uncommon', no:21, v:[2,0,1],
+    moves:[['Lucky Leaf',1,'','Draw a card.'],['Four-Leaf Flick',2,'30','']]},
+  {id:'cometuft',   name:'Cometuft',   el:'stardust',  hp:70,  stage:'Sprout',    h:'3.8 in', rarity:'Uncommon', no:99, v:[2,1,2],
+    moves:[['Tail Spark',1,'20',''],['Down the Hole',2,'40','Switch with one of your benched MUKO.']]},
+];
+const LORE = [
+  {after:1, el:'porcelain', q:'Teacupids nest in cups left out after a tea party. Never rinse one without checking.', by:"Hatter's Almanac, p. 12"},
+  {after:4, el:'stardust',  q:'If your egg feels warm and hums softly, it is probably Stardust.', by:'Field notes, Series 01'},
+  {after:7, el:'iron',      q:'Boltbucks wind themselves up every morning at exactly six minutes past.', by:"White Rabbit's pocket log"},
+  {after:10,el:'flora',     q:'A Mossbun asleep in clover is the luckiest thing you can find in a garden.', by:'Garden of Live Flowers'},
+];
+
+const PAL = {
+  flora:    {body:'#A6D5A7', dark:'#5E9C6C', belly:'#DAEFD2'},
+  porcelain:{body:'#F7F9FD', dark:'#5A84C8', belly:'#FFFFFF', line:'#C3D2EA'},
+  obsidian: {body:'#6D5992', dark:'#463862', belly:'#8B77AE', sclera:true},
+  iron:     {body:'#E4A27B', dark:'#B1673F', belly:'#F3C9A9'},
+  stardust: {body:'#F7D275', dark:'#DFA83A', belly:'#FCEBB9'},
+};
+const INK = '#2E2A3A', LIGHT = '#FFF8EF';
+let uid = 0;
+const r1 = n => Math.round(n*10)/10;
+const pad = n => String(n).padStart(3,'0');
+
+const GLYPHS = {
+  flora:'M8 1.5c3.6 2.3 5.2 5 5.2 7.7A5.2 5.2 0 0 1 8 14.5a5.2 5.2 0 0 1-5.2-5.3C2.8 6.5 4.4 3.8 8 1.5zM8 6v7',
+  porcelain:'M8 2a6 6 0 1 1 0 12A6 6 0 0 1 8 2zm0 2.4a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2z',
+  obsidian:'M5 2h6l3.2 4.2L8 14.5 1.8 6.2z',
+  iron:'M8 1.3l5.8 3.35v6.7L8 14.7l-5.8-3.35v-6.7zM8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z',
+  stardust:'M8 1c.7 3.7 2.5 5.5 7 7-4.5 1.5-6.3 3.3-7 7-.7-3.7-2.5-5.5-7-7 4.5-1.5 6.3-3.3 7-7z',
+};
+const glyphSvg = el => `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="${GLYPHS[el]}" fill="currentColor" fill-rule="evenodd"${el==='flora'?' stroke="currentColor"':''}/></svg>`;
+const glyph = (el, cls='') => `<span class="glyph el-${el} ${cls}" title="${ELEMENTS[el].name}">${glyphSvg(el)}</span>`;
+
+function sparkle(x, y, s, fill, op=1){
+  return `<path d="M${x} ${y-s}Q${r1(x+s*.18)} ${r1(y-s*.18)} ${x+s} ${y}Q${r1(x+s*.18)} ${r1(y+s*.18)} ${x} ${y+s}Q${r1(x-s*.18)} ${r1(y+s*.18)} ${x-s} ${y}Q${r1(x-s*.18)} ${r1(y-s*.18)} ${x} ${y-s}Z" fill="${fill}" opacity="${op}"/>`;
+}
+
+function creatureSVG(el, v, label){
+  const P = PAL[el], id = 'mk'+(uid++);
+  const [rx, ry] = [[50,44],[44,50],[56,38]][v[0]];
+  const cx = 100, cy = 106, top = cy - ry;
+  let back = '', front = '';
+  if (el === 'flora'){
+    const leaf = (x,y,r) => `<g transform="translate(${x} ${y}) rotate(${r})"><path d="M0 0C-15-10-13-36 0-46C13-36 15-10 0 0Z" fill="${P.dark}"/><path d="M0-6V-38" stroke="${P.belly}" stroke-width="2" stroke-linecap="round"/></g>`;
+    back = leaf(cx-18, top+12, -30) + leaf(cx+18, top+12, 30);
+    front = `<path d="M${cx} ${top+3}c0-8 4-12 10-13" stroke="${P.dark}" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="${cx+11}" cy="${top-11}" r="4.5" fill="#F29CB0"/><circle cx="${cx+11}" cy="${top-11}" r="1.6" fill="#FFF3B0"/>`;
+  } else if (el === 'porcelain'){
+    const hx = cx + rx + 3;
+    back = `<circle cx="${hx}" cy="${cy}" r="14" fill="none" stroke="${P.line}" stroke-width="11"/><circle cx="${hx}" cy="${cy}" r="14" fill="none" stroke="${P.body}" stroke-width="7"/><ellipse cx="${cx}" cy="${top+2}" rx="13" ry="8" fill="${P.dark}"/><circle cx="${cx}" cy="${top-7}" r="5.5" fill="${P.dark}"/>`;
+    const wy = r1(cy + ry*.42), x0 = cx - rx - 10, n = Math.ceil((2*rx+20)/14);
+    let dots = '';
+    for (let x = cx - rx + 6; x < cx + rx; x += 14) dots += `<circle cx="${x}" cy="${r1(wy+11)}" r="2.2" fill="${P.dark}" opacity=".7"/>`;
+    front = `<g clip-path="url(#${id})"><path d="M${x0} ${wy}q7-6 14 0${' t14 0'.repeat(n)}" fill="none" stroke="${P.dark}" stroke-width="3" opacity=".75"/>${dots}<path d="M${cx-rx} ${top+14}H${cx+rx}" stroke="${P.dark}" stroke-width="2" opacity=".35"/></g>`;
+  } else if (el === 'obsidian'){
+    const horn = s => {
+      const X = x => cx + s*(x - cx);
+      return `<path d="M${X(cx-24)} ${top+12}L${X(cx-34)} ${top-22}L${X(cx-8)} ${top+4}Z" fill="${P.dark}"/><path d="M${X(cx-24)} ${top+12}L${X(cx-34)} ${top-22}L${X(cx-18)} ${top+6}Z" fill="#9C88C4"/>`;
+    };
+    back = horn(1) + horn(-1);
+    front = `<ellipse cx="${r1(cx-rx*.45)}" cy="${r1(cy-ry*.5)}" rx="13" ry="7" fill="#fff" opacity=".32" transform="rotate(-32 ${r1(cx-rx*.45)} ${r1(cy-ry*.5)})"/>` + sparkle(r1(cx+rx*.5), r1(cy+ry*.5), 5, '#E5DAFA', .8);
+  } else if (el === 'iron'){
+    back = `<path d="M${cx} ${top+4}V${top-20}" stroke="${P.dark}" stroke-width="4" stroke-linecap="round"/><circle cx="${cx}" cy="${top-25}" r="7" fill="#F2C14E"/><circle cx="${cx-2}" cy="${top-27}" r="2" fill="#fff" opacity=".7"/>`
+      + `<rect x="${cx-rx-9}" y="${cy-12}" width="16" height="24" rx="5" fill="${P.dark}"/><rect x="${cx+rx-7}" y="${cy-12}" width="16" height="24" rx="5" fill="${P.dark}"/>`;
+    const by = r1(cy + ry*.3);
+    let rivets = '';
+    for (let x = cx - rx + 8; x < cx + rx; x += 15) rivets += `<circle cx="${x}" cy="${r1(by+4.5)}" r="2.4" fill="${P.dark}"/>`;
+    front = `<g clip-path="url(#${id})"><rect x="${cx-rx}" y="${by}" width="${2*rx}" height="9" fill="${P.dark}" opacity=".35"/>${rivets}</g>`;
+  } else if (el === 'stardust'){
+    back = `<path d="M${cx-32} ${top+18}Q${cx-50} ${top-18} ${cx-10} ${top+4}Z" fill="${P.dark}"/><path d="M${cx+32} ${top+18}Q${cx+50} ${top-18} ${cx+10} ${top+4}Z" fill="${P.dark}"/>`;
+    front = sparkle(cx, r1(top+ry*.3), 7, '#FFFFFF', .95)
+      + sparkle(cx-rx-14, top+12, 6, '#FFFFFF', .9) + sparkle(cx+rx+12, top+26, 8, '#FFFFFF', .85) + sparkle(cx+rx+2, cy+ry-8, 4, '#FFFFFF', .8);
+  }
+
+  const ey = r1(cy - ry*.06), dx = Math.round(rx*.38);
+  const eyeInk = INK, mouthInk = P.sclera ? LIGHT : INK;
+  let face = '';
+  for (const x of [cx-dx, cx+dx]){
+    if (v[1] === 1){
+      face += `<path d="M${x-6} ${ey+2}q6-8 12 0" stroke="${P.sclera ? LIGHT : INK}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+    } else {
+      const r = v[1] === 2 ? 8.5 : 6;
+      if (P.sclera) face += `<circle cx="${x}" cy="${ey}" r="${r+3}" fill="${LIGHT}"/>`;
+      face += `<circle cx="${x}" cy="${ey}" r="${r}" fill="${eyeInk}"/><circle cx="${x+r*.35}" cy="${r1(ey-r*.35)}" r="${r1(r*.33)}" fill="#fff"/>`;
+      if (v[1] === 2) face += `<circle cx="${r1(x-r*.3)}" cy="${r1(ey+r*.35)}" r="1.4" fill="#fff"/>`;
+    }
+  }
+  face += `<ellipse cx="${r1(cx-rx*.62)}" cy="${ey+11}" rx="7" ry="4.5" fill="#F29CB0" opacity=".6"/><ellipse cx="${r1(cx+rx*.62)}" cy="${ey+11}" rx="7" ry="4.5" fill="#F29CB0" opacity=".6"/>`;
+  const my = r1(ey + 12);
+  face += v[2] === 0 ? `<path d="M${cx-7} ${my}q3.5 4 7 0q3.5 4 7 0" stroke="${mouthInk}" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
+        : v[2] === 1 ? `<ellipse cx="${cx}" cy="${my+1}" rx="3" ry="3.6" fill="${mouthInk}"/>`
+        : `<path d="M${cx-6} ${my-1}q6 7 12 0" stroke="${mouthInk}" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+
+  return `<svg viewBox="0 0 200 170" role="img" aria-label="${label}">
+    <defs><clipPath id="${id}"><ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/></clipPath></defs>
+    <ellipse cx="100" cy="${cy+ry+6}" rx="${r1(rx*.85)}" ry="7" fill="#2E2A3A" opacity=".13"/>
+    ${back}
+    <ellipse cx="${r1(cx-rx*.45)}" cy="${cy+ry-2}" rx="11" ry="7" fill="${P.dark}"/><ellipse cx="${r1(cx+rx*.45)}" cy="${cy+ry-2}" rx="11" ry="7" fill="${P.dark}"/>
+    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${P.body}"${P.line ? ` stroke="${P.line}" stroke-width="2"` : ''}/>
+    <g clip-path="url(#${id})"><ellipse cx="${cx}" cy="${r1(cy+ry*.42)}" rx="${r1(rx*.62)}" ry="${r1(ry*.5)}" fill="${P.belly}"/></g>
+    ${front}${face}
+  </svg>`;
+}
+
+function cardHTML(c){
+  const E = ELEMENTS[c.el];
+  const moves = c.moves.map(m => `<div class="move"><span class="cost" aria-label="${m[1]} energy">${'<i></i>'.repeat(m[1])}</span><span class="move-text"><b>${m[0]}</b>${m[3] ? `<small>${m[3]}</small>` : ''}</span><span class="dmg">${m[2]}</span></div>`).join('');
+  return `<article class="card el-${c.el}${c.rarity==='Mythic' ? ' is-mythic' : ''}" data-el="${c.el}" aria-label="${c.name}, ${E.name} type, ${c.hp} HP, ${c.rarity}">
+    <div class="card-inner">
+      <header class="card-head"><h3 class="card-name">${c.name}</h3><span class="card-hp"><small>HP</small>${c.hp}</span>${glyph(c.el)}</header>
+      <div class="art" data-el="${c.el}">${creatureSVG(c.el, c.v, c.name+' artwork')}<span class="art-no">No. ${pad(c.no)}</span></div>
+      <p class="typeline">${c.stage} · ${E.name} · ${c.h}</p>
+      <div class="moves">${moves}</div>
+      <footer class="card-foot">
+        <span>Weak ${glyph(E.weak)} ×2</span>
+        <span>Resist ${glyph(E.resist)} −20</span>
+        <span class="rarity" title="${c.rarity}">${RARITY[c.rarity]} ${pad(c.no)}/120</span>
+      </footer>
+    </div>
+  </article>`;
+}
+
+// Pointer tilt + light bloom that follows the cursor
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const finePointer = matchMedia('(hover: hover)').matches;
+function bindTilt(root){
+  if (reduceMotion || !finePointer) return;
+  root.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('pointermove', e => {
+      const b = card.getBoundingClientRect();
+      const px = (e.clientX - b.left)/b.width, py = (e.clientY - b.top)/b.height;
+      card.classList.add('tilting');
+      card.style.setProperty('--ry', ((px - .5)*12).toFixed(2)+'deg');
+      card.style.setProperty('--rx', ((.5 - py)*10).toFixed(2)+'deg');
+      card.style.setProperty('--mx', (px*100).toFixed(1)+'%');
+      card.style.setProperty('--my', (py*100).toFixed(1)+'%');
+    });
+    card.addEventListener('pointerleave', () => {
+      card.classList.remove('tilting');
+      card.style.setProperty('--rx','0deg'); card.style.setProperty('--ry','0deg');
+    });
+  });
+}
+
+// Toast
+const toastEl = document.getElementById('toast');
+let toastTimer;
+function toast(msg){
+  toastEl.textContent = msg; toastEl.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3400);
+}
+
+// Element tiles
+document.getElementById('elementTiles').innerHTML = ORDER.map(k => {
+  const E = ELEMENTS[k];
+  return `<article class="el-tile el-${k}">${glyph(k)}<h3>${E.name}</h3><p>${E.trait}</p>
+    <span class="matchup">Weak to ${glyph(E.weak,'mini')} ${ELEMENTS[E.weak].name}</span></article>`;
+}).join('');
+
+// Gallery
+const masonry = document.getElementById('masonry');
+let galleryHTML = '';
+CREATURES.forEach((c, i) => {
+  galleryHTML += cardHTML(c);
+  const lore = LORE.find(l => l.after === i);
+  if (lore) galleryHTML += `<aside class="lore el-${lore.el}" data-el="${lore.el}"><q>${lore.q}</q><span>${glyph(lore.el,'mini')} ${lore.by}</span></aside>`;
+});
+masonry.innerHTML = galleryHTML;
+bindTilt(masonry);
+
+const filters = document.getElementById('filters');
+filters.innerHTML = `<button type="button" class="chip all" data-filter="all" aria-pressed="true">All</button>` +
+  ORDER.map(k => `<button type="button" class="chip" data-filter="${k}" aria-pressed="false">${glyph(k)}${ELEMENTS[k].name}</button>`).join('');
+const countEl = document.getElementById('count');
+function applyFilter(f){
+  filters.querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.filter === f)));
+  let n = 0;
+  masonry.querySelectorAll('[data-el]').forEach(el => {
+    if (!el.matches('.card, .lore')) return;
+    const show = f === 'all' || el.dataset.el === f;
+    el.hidden = !show;
+    if (show && el.classList.contains('card')) n++;
+  });
+  countEl.textContent = `Showing ${n} of 120 creatures` + (f === 'all' ? '' : ` · ${ELEMENTS[f].name}`);
+}
+filters.addEventListener('click', e => { const b = e.target.closest('.chip'); if (b) applyFilter(b.dataset.filter); });
+applyFilter('all');
+
+// Hero egg
+const egg = document.getElementById('egg'), result = document.getElementById('result'),
+      hintText = document.getElementById('hintText'), hint = document.getElementById('hint'),
+      pedestal = document.getElementById('pedestal'), stage = document.getElementById('stage');
+const dots = hint.querySelectorAll('.dots i');
+const HINTS = ['Tap the egg to hatch it', 'Something wiggled…', 'Almost there, one more tap'];
+let taps = 0, busy = false;
+
+function pickCreature(){
+  let roll = Math.random()*100, rarity = 'Common';
+  for (const [k, w] of Object.entries(WEIGHTS)){ if ((roll -= w) < 0){ rarity = k; break; } }
+  const pool = CREATURES.filter(c => c.rarity === rarity);
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function burst(){
+  const colors = ['var(--flora)','var(--porcelain)','var(--obsidian)','var(--iron)','var(--stardust)','var(--cheek)'];
+  for (let i = 0; i < 18; i++){
+    const s = document.createElement('span');
+    const a = (i/18)*Math.PI*2 + Math.random()*.4, d = 110 + Math.random()*90;
+    s.className = 'spark' + (i % 3 === 0 ? ' star' : '');
+    s.style.setProperty('--c', colors[i % colors.length]);
+    s.style.setProperty('--dx', Math.cos(a)*d + 'px');
+    s.style.setProperty('--dy', Math.sin(a)*d + 'px');
+    stage.appendChild(s);
+    setTimeout(() => s.remove(), 1000);
+  }
+}
+function hatch(){
+  busy = true;
+  const c = pickCreature();
+  egg.classList.add('pop');
+  burst();
+  setTimeout(() => {
+    egg.hidden = true; pedestal.style.opacity = 0; hint.hidden = true;
+    result.innerHTML = cardHTML(c) +
+      `<p class="result-note">You hatched <b>${c.name}</b>, a ${c.rarity} ${ELEMENTS[c.el].name} MUKO.</p>
+       <div class="result-actions">
+         <button type="button" class="btn btn-ghost" id="again">Hatch another egg</button>
+         <button type="button" class="btn btn-primary" id="toLife">Bring it to life</button>
+       </div>`;
+    result.hidden = false;
+    bindTilt(result);
+    document.getElementById('again').addEventListener('click', resetEgg);
+    document.getElementById('toLife').addEventListener('click', () => {
+      select(c.id); setMode('physical');
+      document.getElementById('manifest').scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth'});
+    });
+  }, 430);
+}
+function resetEgg(){
+  taps = 0; busy = false;
+  egg.dataset.stage = '0'; egg.classList.remove('pop','shake');
+  egg.hidden = false; result.hidden = true; result.innerHTML = '';
+  pedestal.style.opacity = ''; hint.hidden = false;
+  hintText.textContent = HINTS[0]; dots.forEach(d => d.classList.remove('on'));
+  egg.focus({preventScroll:true});
+}
+egg.addEventListener('click', () => {
+  if (busy) return;
+  taps++;
+  egg.dataset.stage = String(taps);
+  dots.forEach((d, i) => d.classList.toggle('on', i < taps));
+  egg.classList.remove('shake'); void egg.offsetWidth; egg.classList.add('shake');
+  if (taps >= 3) hatch(); else hintText.textContent = HINTS[taps];
+});
+
+// Manifest
+const showcase = document.getElementById('showcase'), seg = document.getElementById('seg'),
+      picker = document.getElementById('picker'), specs = document.getElementById('specs'),
+      cta = document.getElementById('manifestCta'), modeCopy = document.getElementById('modeCopy'),
+      timeline = document.getElementById('timeline'), journeyTitle = document.getElementById('journeyTitle'),
+      journeyNote = document.getElementById('journeyNote');
+const PICKS = ['mossbun','teacupid','inkmoth','boltbuck','twinklope'];
+let selected = CREATURES[0], mode = 'digital';
+
+picker.insertAdjacentHTML('beforeend', PICKS.map(id => {
+  const c = CREATURES.find(x => x.id === id);
+  return `<button type="button" class="avatar el-${c.el}" id="pick-${c.id}" data-id="${c.id}" aria-pressed="false" aria-label="${c.name}"><span class="art" data-el="${c.el}">${creatureSVG(c.el, c.v, '')}</span></button>`;
+}).join(''));
+picker.addEventListener('click', e => { const b = e.target.closest('.avatar'); if (b) select(b.dataset.id); });
+seg.addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
+
+const CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function select(id){
+  selected = CREATURES.find(c => c.id === id) || selected;
+  picker.querySelectorAll('.avatar').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === selected.id)));
+  ORDER.forEach(k => showcase.classList.remove('el-'+k));
+  showcase.classList.add('el-'+selected.el);
+  timeline.className = 'timeline el-' + selected.el;
+  showcase.innerHTML = `<span class="mode-badge"><i></i><span id="badgeText"></span></span>` + cardHTML(selected) +
+    `<div class="toy" aria-label="${selected.name} as a vinyl art toy"><div class="toy-figure">${creatureSVG(selected.el, selected.v, selected.name+' art toy')}</div><div class="toy-base"></div><span class="toy-tag">${selected.name} · Edition ${pad(selected.no)} of 500</span></div>`;
+  bindTilt(showcase);
+  render();
+}
+function setMode(m){
+  mode = m;
+  seg.dataset.mode = m; showcase.dataset.mode = m;
+  seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+  render();
+}
+function render(){
+  const c = selected, phys = mode === 'physical';
+  document.getElementById('badgeText').textContent = phys ? 'Art toy preview' : 'Digital card';
+  modeCopy.textContent = phys
+    ? `We sculpt ${c.name} in soft-touch vinyl and paint it by hand. Your digital card stays in your collection and gets a gold “Manifested” stamp.`
+    : `${c.name} lives in your collection. Battle, trade and level it up. You can bring it to life whenever you are ready.`;
+  const rows = phys
+    ? [['Height','4.5 in · 11.4 cm'],['Finish','Matte vinyl, hand-painted'],['Edition',`${pad(c.no)} of 500`],['Price','$68 · free shipping']]
+    : [['Card number',`${pad(c.no)}/120`],['Rarity',`${RARITY[c.rarity]} ${c.rarity}`],['Bond level','3 of 5'],['Price','Included with your egg']];
+  specs.innerHTML = rows.map(([k,v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+  cta.textContent = phys ? `Manifest ${c.name} · $68` : `Keep ${c.name} in my collection`;
+
+  journeyTitle.textContent = `${c.name}'s journey`;
+  journeyNote.textContent = phys ? 'Estimated arrival: around Dec 8, 2026' : 'Manifest is optional and available any time';
+  const steps = [
+    ['Hatched','Cracked open from a mystery egg.','Oct 2'],
+    ['Bonded','Played together for 7 days.','Oct 9'],
+    ['Manifest','You chose to bring it to life.', phys ? 'Oct 20' : 'Any time'],
+    ['Sculpted','Shaped in soft vinyl at the studio.', phys ? 'Week 3 of 4' : ''],
+    ['Painted','Airbrushed in nine matte coats.', phys ? 'Nov 24' : ''],
+    ['Delivered','Arrives in a box you get to hatch.', phys ? 'Dec 8' : ''],
+  ];
+  const doneUntil = phys ? 3 : 2; // count of completed steps
+  timeline.innerHTML = steps.map(([t, d, when], i) => {
+    let cls = 'upcoming';
+    if (i < doneUntil) cls = 'done';
+    else if (phys && i === doneUntil) cls = 'current';
+    else if (!phys && i === doneUntil) cls = 'next';
+    const extra = cls === 'current' ? `<div class="bar" aria-label="75% complete"><i style="--p:75%"></i></div>` : '';
+    return `<li class="step ${cls}"><span class="node">${cls === 'done' ? CHECK : ''}</span><h4>${t}</h4><p>${d}</p>${when ? `<span class="when">${when}</span>` : ''}${extra}</li>`;
+  }).join('');
+}
+cta.addEventListener('click', () => {
+  toast(mode === 'physical'
+    ? `Manifest requested for ${selected.name}. This is a design demo, so no order was placed.`
+    : `${selected.name} stays in your digital collection.`);
+});
+select('mossbun');
+})();
+</script>
+</body>
+</html>
